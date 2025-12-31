@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura Veyn | Clan Roster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar__container">
+      <a href="index.html" class="navbar__brand">
+        <img src="public/logo.png" alt="Aura Veyn" class="brand__logo" />
+        <span class="brand__text">Aura Veyn</span>
+      </a>
+      <ul class="navbar__menu">
+        <li><a href="index.html" class="nav-link active">Home</a></li>
+        <li><a href="#roster" class="nav-link">Roster</a></li>
+        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#achievements" class="nav-link">Achievements</a></li>
+        <li><a href="#contact" class="nav-link">Contact</a></li>
+      </ul>
+      <div class="navbar__actions">
+        <a href="login.html" class="btn btn--nav" id="loginLink">Admin Login</a>
+        <button class="btn btn--nav" id="logoutBtn" style="display: none;">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero__content">
+        <h1 class="hero__title">Aura Veyn</h1>
+        <p class="hero__subtitle">Official Clan Members for the Aura Veyn CODM clan. Strategic excellence meets competitive dominance.</p>
+        <div class="hero__stats">
+          <div class="stat-card">
+            <span class="stat-card__value" id="memberCount">0</span>
+            <span class="stat-card__label">Members</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__value" id="officerCount">0</span>
+            <span class="stat-card__label">Officers</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-card__value">2025</span>
+            <span class="stat-card__label">Established</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="roster">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Official Clan Members</h2>
+        </div>
+        <div class="admin-controls" id="adminControls">
+          <button class="btn btn--primary" id="addMemberBtn">
+            <span>+</span> Add Member
+          </button>
+          <button class="btn btn--secondary" id="resetDataBtn">
+            <span>↻</span> Refresh
+          </button>
+        </div>
+      </div>
+
+      <section class="roster-section">
+        <div class="roster-section__header">
+          <h3 class="roster-section__title">Clan Officers</h3>
+          <span class="roster-section__count" id="officerCount">0</span>
+        </div>
+        <div class="card-grid" id="officerGrid"></div>
+      </section>
+
+      <section class="roster-section">
+        <div class="roster-section__header">
+          <h3 class="roster-section__title">Clan Members</h3>
+          <span class="roster-section__count" id="memberOnlyCount">0</span>
+        </div>
+        <div class="card-grid" id="memberGrid"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="memberModal" aria-hidden="true">
+    <div class="modal__backdrop" id="modalBackdrop"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header class="modal__header">
+        <div>
+          <p class="eyebrow" id="modalMode">Create</p>
+          <h3 id="modalTitle">Add Clan Member</h3>
+        </div>
+        <button class="icon-btn" id="closeModal" aria-label="Close">✕</button>
+      </header>
+
+      <form id="memberForm" class="form">
+        <input type="hidden" id="memberId" />
+        <div class="form__row">
+          <label for="ign">In-game name</label>
+          <input id="ign" name="ign" type="text" placeholder="GhostRider" required />
+        </div>
+        <div class="form__row form__row--split">
+          <label for="role">Role</label>
+          <select id="role" name="role" required>
+            <option value="Clan Master">Clan Master</option>
+            <option value="Vice Clan Master">Vice Clan Master</option>
+            <option value="Tryout Handler">Tryout Handler</option>
+            <option value="Scrim Handler">Scrim Handler</option>
+            <option value="Recruiter">Recruiter</option>
+            <option value="Admin">Admin</option>
+            <option value="Page Handler">Page Handler</option>
+            <option value="Member">Member</option>
+          </select>
+        </div>
+        <div class="form__row form__row--split">
+          <label for="mode">Main mode</label>
+          <select id="mode" name="mode" required>
+            <option value="MP">MP</option>
+            <option value="BR">BR</option>
+            <option value="MP & BR">MP & BR</option>
+          </select>
+        </div>
+        <div class="form__row">
+          <label for="description">Short description</label>
+          <textarea id="description" name="description" rows="3" placeholder="Entry fragger, loves control." required></textarea>
+        </div>
+        <div class="form__row form__row--split">
+          <label for="avatar">Profile picture</label>
+          <div class="upload">
+            <input id="avatar" name="avatar" type="file" accept="image/*" />
+            <div class="upload__hint">Upload a square image (optional). Falls back to generated badge.</div>
+          </div>
+          <div class="avatar-preview" id="avatarPreview" aria-label="Preview"></div>
+        </div>
+        <footer class="form__footer">
+          <button type="button" class="btn btn--ghost" id="cancelModal">Cancel</button>
+          <button type="submit" class="btn">Save member</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
