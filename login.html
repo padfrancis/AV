@@ -304,7 +304,53 @@
       to { transform: rotate(360deg); }
     }
 
-    @media (max-width: 480px) {
+    /* Footer */
+    .site-footer {
+      margin-top: 80px;
+      padding: 40px 32px;
+      border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, transparent 0%, rgba(245, 169, 196, 0.05) 100%);
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .footer-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .footer-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      transition: var(--transition);
+      position: relative;
+      padding-bottom: 2px;
+      border-bottom: 1px solid transparent;
+    }
+
+    .footer-link:hover {
+      color: var(--accent-hover);
+      border-bottom-color: var(--accent);
+    }
+
+    body {
+      padding-bottom: 100px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
       .login-container {
         padding: 32px 24px;
       }
@@ -317,6 +363,23 @@
         top: 20px;
         left: 20px;
         padding: 8px 16px;
+      }
+
+      .login-container {
+        padding: 32px 24px;
+      }
+
+      .logo-word {
+        font-size: 40px;
+      }
+
+      .site-footer {
+        padding: 24px 16px;
+        margin-top: 60px;
+      }
+
+      .footer-text {
+        font-size: 12px;
       }
     }
   </style>
@@ -353,6 +416,14 @@
       </form>
     </div>
   </div>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p class="footer-text">
+        Made by <a href="https://github.com/padfrancis" target="_blank" rel="noopener noreferrer" class="footer-link">padfrancis</a>
+      </p>
+    </div>
+  </footer>
 
   <script type="module" src="login.js"></script>
 </body>

@@ -31,6 +31,38 @@ const addMemberBtn = document.getElementById("addMemberBtn");
 const resetDataBtn = document.getElementById("resetDataBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const loginLink = document.getElementById("loginLink");
+const hamburger = document.getElementById("hamburger");
+const menuWrapper = document.getElementById("menuWrapper");
+
+// Hamburger menu toggle
+if (hamburger && menuWrapper) {
+  hamburger.addEventListener("click", () => {
+    const isOpen = hamburger.getAttribute("aria-expanded") === "true";
+    hamburger.setAttribute("aria-expanded", !isOpen);
+    menuWrapper.classList.toggle("active");
+  });
+
+  // Close menu when a link is clicked
+  const menuLinks = menuWrapper.querySelectorAll("a");
+  menuLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      hamburger.setAttribute("aria-expanded", "false");
+      menuWrapper.classList.remove("active");
+    });
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener("click", (e) => {
+    if (
+      !hamburger.contains(e.target) &&
+      !menuWrapper.contains(e.target) &&
+      menuWrapper.classList.contains("active")
+    ) {
+      hamburger.setAttribute("aria-expanded", "false");
+      menuWrapper.classList.remove("active");
+    }
+  });
+}
 
 // Update logout button visibility in navbar
 function updateNavbar() {
