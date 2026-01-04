@@ -1,8 +1,5 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const SUPABASE_URL = "https://rlgelnedymfzpyiddkna.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_jWtcDBPbRUWuhqTWKk7-AA_-E7CZp7Q";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Use shared Supabase client from supabase-config.js
+const supabase = window.supabaseClient;
 
 const initialMembers = [];
 
@@ -31,6 +28,7 @@ const addMemberBtn = document.getElementById("addMemberBtn");
 const resetDataBtn = document.getElementById("resetDataBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const loginLink = document.getElementById("loginLink");
+const applyNav = document.getElementById("applyNav");
 const hamburger = document.getElementById("hamburger");
 const menuWrapper = document.getElementById("menuWrapper");
 
@@ -64,14 +62,37 @@ if (hamburger && menuWrapper) {
   });
 }
 
-// Update logout button visibility in navbar
+// Update logout/login visibility in navbar (handles desktop + mobile duplicates)
 function updateNavbar() {
+  const adminDashboardNav = document.getElementById('adminDashboardNav');
+  const userGreeting = document.getElementById('userGreeting');
+  const brandGreeting = document.getElementById('brandGreeting');
+  const loginLinks = document.querySelectorAll('[id="loginLink"]');
+  const logoutButtons = document.querySelectorAll('[id="logoutBtn"]');
+
   if (state.isAdmin) {
-    loginLink.style.display = "none";
-    logoutBtn.style.display = "inline-flex";
+    loginLinks.forEach((el) => (el.style.display = 'none'));
+    logoutButtons.forEach((el) => (el.style.display = 'inline-flex'));
+    if (adminDashboardNav) adminDashboardNav.style.display = 'block';
+    if (applyNav) applyNav.style.display = 'none';
+
+    if (state.userEmail) {
+      const username = state.userEmail.split('@')[0];
+      if (userGreeting) {
+        userGreeting.textContent = `Hi, ${username}`;
+        userGreeting.style.display = 'inline-block';
+      }
+      if (brandGreeting) {
+        brandGreeting.textContent = `Hi, ${username}`;
+      }
+    }
   } else {
-    loginLink.style.display = "inline-flex";
-    logoutBtn.style.display = "none";
+    loginLinks.forEach((el) => (el.style.display = 'inline-flex'));
+    logoutButtons.forEach((el) => (el.style.display = 'none'));
+    if (adminDashboardNav) adminDashboardNav.style.display = 'none';
+    if (applyNav) applyNav.style.display = 'block';
+    if (userGreeting) userGreeting.style.display = 'none';
+    if (brandGreeting) brandGreeting.textContent = 'Hi, Visitor';
   }
 }
 
@@ -249,9 +270,18 @@ resetDataBtn.addEventListener("click", () => {
   fetchMembers();
 });
 
-logoutBtn.addEventListener("click", async () => {
-  await supabase.auth.signOut();
-  window.location.href = "login.html";
+document.querySelectorAll('[id="logoutBtn"]').forEach((btn) => {
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      window.location.href = "index.html";
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert('Error logging out. Please try again.');
+    }
+  });
 });
 
 [officerGrid, memberGrid].forEach((grid) =>
@@ -300,6 +330,15 @@ memberForm.addEventListener("submit", async (event) => {
 avatarPreview.textContent = "No image";
 (async function init() {
   await ensureSession();
-  render();
+  updateNavbar();
   await fetchMembers();
+
+  // Real-time auth state updates (login/logout)
+  if (supabase?.auth) {
+    supabase.auth.onAuthStateChange(async (_event, session) => {
+      state.isAdmin = !!session;
+      state.userEmail = session?.user?.email || null;
+      updateNavbar();
+    });
+  }
 })();

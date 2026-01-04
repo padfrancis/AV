@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #fff;
+    }
+    .test-section {
+      background: #16213e;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      border: 1px solid #0f3460;
+    }
+    h2 {
+      color: #e94560;
+      margin-top: 0;
+    }
+    input, button {
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background: #e94560;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #c23a51;
+    }
+    .result {
+      background: #0f3460;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    .success { color: #4ecca3; }
+    .error { color: #e94560; }
+  </style>
+</head>
+<body>
+  <h1>🔧 Application Form Debugger</h1>
+
+  <!-- Test 1: Age Calculator -->
+  <div class="test-section">
+    <h2>Test 1: Age Auto-Calculate</h2>
+    <label>Birthday:</label>
+    <input type="date" id="testBirthday">
+    <label>Age (should auto-fill):</label>
+    <input type="number" id="testAge" readonly style="background: #0f3460;">
+    <div id="ageResult" class="result"></div>
+  </div>
+
+  <!-- Test 2: File Upload -->
+  <div class="test-section">
+    <h2>Test 2: File Upload</h2>
+    <div style="border: 2px dashed #e94560; padding: 20px; text-align: center; cursor: pointer;" id="testUpload">
+      📁 Click to Upload
+    </div>
+    <input type="file" id="testFileInput" style="display: none;" accept="image/*">
+    <div id="uploadResult" class="result"></div>
+    <img id="testPreview" style="max-width: 100%; margin-top: 10px; display: none;">
+  </div>
+
+  <!-- Test 3: Supabase Connection -->
+  <div class="test-section">
+    <h2>Test 3: Supabase Connection</h2>
+    <button onclick="testSupabase()">Test Connection</button>
+    <div id="supabaseResult" class="result"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    // Test 1: Age Calculator
+    const testBirthday = document.getElementById('testBirthday');
+    const testAge = document.getElementById('testAge');
+    const ageResult = document.getElementById('ageResult');
+
+    testBirthday.addEventListener('change', function() {
+      if (this.value) {
+        const birthDate = new Date(this.value);
+        const today = new Date();
+        
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        
+        testAge.value = age;
+        ageResult.innerHTML = `<span class="success">✓ Age calculated: ${age} years old</span>`;
+      }
+    });
+
+    // Test 2: File Upload
+    const testUpload = document.getElementById('testUpload');
+    const testFileInput = document.getElementById('testFileInput');
+    const uploadResult = document.getElementById('uploadResult');
+    const testPreview = document.getElementById('testPreview');
+
+    testUpload.addEventListener('click', () => {
+      uploadResult.innerHTML = '<span class="success">✓ Click handler working!</span>';
+      testFileInput.click();
+    });
+
+    testFileInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        const file = this.files[0];
+        uploadResult.innerHTML = `<span class="success">✓ File selected: ${file.name} (${(file.size / 1024).toFixed(2)} KB)</span>`;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          testPreview.src = e.target.result;
+          testPreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Test 3: Supabase
+    function testSupabase() {
+      const result = document.getElementById('supabaseResult');
+      
+      if (!window.supabaseClient) {
+        result.innerHTML = '<span class="error">✗ Supabase client not loaded</span>';
+        return;
+      }
+      
+      result.innerHTML = '<span class="success">⏳ Testing connection...</span>';
+      
+      window.supabaseClient.auth.getSession()
+        .then(({ data, error }) => {
+          if (error) {
+            result.innerHTML = `<span class="error">✗ Error: ${error.message}</span>`;
+          } else {
+            result.innerHTML = `<span class="success">✓ Supabase connected!</span><br>Session: ${data.session ? 'Logged in' : 'Not logged in'}`;
+          }
+        })
+        .catch(err => {
+          result.innerHTML = `<span class="error">✗ Connection failed: ${err.message}</span>`;
+        });
+    }
+
+    // Auto-test on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (window.supabaseClient) {
+          document.getElementById('supabaseResult').innerHTML = '<span class="success">✓ Supabase client loaded</span>';
+        } else {
+          document.getElementById('supabaseResult').innerHTML = '<span class="error">✗ Supabase client NOT loaded</span>';
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>

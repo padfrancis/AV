@@ -8,13 +8,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
 </head>
 <body>
   <nav class="navbar">
     <div class="navbar__container">
       <a href="index.html" class="navbar__brand">
         <img src="./logo.png" alt="Aura Veyn" class="brand__logo" />
-        <span class="brand__text">Aura Veyn</span>
+        <span class="brand__text" id="brandGreeting">Hi, Visitor</span>
       </a>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
         <span></span>
@@ -24,17 +26,18 @@
       <div class="navbar__menu-wrapper" id="menuWrapper">
         <ul class="navbar__menu">
           <li><a href="index.html" class="nav-link active">Home</a></li>
-          <li><a href="#roster" class="nav-link">Roster</a></li>
-          <li><a href="#about" class="nav-link">About</a></li>
-          <li><a href="#achievements" class="nav-link">Achievements</a></li>
-          <li><a href="#contact" class="nav-link">Contact</a></li>
+          <li><a href="#roster" class="nav-link">Offiicial Members</a></li>
+          <li id="applyNav"><a href="application.html" class="nav-link">Apply</a></li>
+          <li id="adminDashboardNav" style="display: none;"><a href="admin.html" class="nav-link">Admin Dashboard</a></li>
         </ul>
         <div class="navbar__actions-mobile">
+          <span class="user-greeting" id="userGreeting" style="display: none; color: var(--accent); margin-right: 12px;"></span>
           <a href="login.html" class="btn btn--nav" id="loginLink">Admin Login</a>
           <button class="btn btn--nav" id="logoutBtn" style="display: none;">Sign Out</button>
         </div>
       </div>
       <div class="navbar__actions">
+        <span class="user-greeting" id="userGreeting" style="display: none; color: var(--accent); margin-right: 12px;"></span>
         <a href="login.html" class="btn btn--nav" id="loginLink">Admin Login</a>
         <button class="btn btn--nav" id="logoutBtn" style="display: none;">Sign Out</button>
       </div>
@@ -45,7 +48,7 @@
     <header class="hero">
       <div class="hero__content">
         <h1 class="hero__title">Aura Veyn</h1>
-        <p class="hero__subtitle">Official Clan Members for the Aura Veyn CODM clan. Strategic excellence meets competitive dominance.</p>
+        <p class="hero__subtitle">Official Clan Members for the Aura Veyn CODM clan.</p>
         <div class="hero__stats">
           <div class="stat-card">
             <span class="stat-card__value" id="memberCount">0</span>
@@ -68,7 +71,7 @@
         <div>
           <h2 class="section-title">Official Clan Members</h2>
         </div>
-        <div class="admin-controls" id="adminControls">
+        <div class="admin-controls hidden" id="adminControls">
           <button class="btn btn--primary" id="addMemberBtn">
             <span>+</span> Add Member
           </button>

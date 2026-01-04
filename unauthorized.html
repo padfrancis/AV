@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura Veyn | Unauthorized Access</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --surface: #131720;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --text-secondary: #a0a8b8;
+      --accent: #f5a9c4;
+      --accent-hover: #ffc1dc;
+      --radius: 16px;
+      --font-sans: "Sora", system-ui, -apple-system, sans-serif;
+      --font-display: "Cinzel", serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .error-container {
+      text-align: center;
+      padding: 40px 20px;
+      max-width: 600px;
+    }
+
+    .error-code {
+      font-family: var(--font-display);
+      font-size: 8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #c8b6ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .error-icon {
+      font-size: 5rem;
+      margin: 20px 0;
+    }
+
+    .error-title {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 20px 0 16px;
+      color: var(--accent);
+    }
+
+    .error-description {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .error-details {
+      background: rgba(245, 169, 196, 0.05);
+      border: 1px solid rgba(245, 169, 196, 0.2);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin: 32px 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .error-details p {
+      margin: 8px 0;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #c8b6ff);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(245, 169, 196, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(245, 169, 196, 0.1);
+    }
+
+    .security-badge {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .security-badge strong {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="error-icon">🔒</div>
+    <h1 class="error-code">401</h1>
+    <h2 class="error-title">Unauthorized Access</h2>
+    
+    <p class="error-description">
+      You don't have permission to access this resource.
+    </p>
+
+    <div class="error-details">
+      <p><strong>Why are you seeing this?</strong></p>
+      <p>This page is only accessible to authenticated administrators of the Aura Veyn clan.</p>
+      <p style="margin-top: 16px;">If you're an admin, please log in to access the admin dashboard.</p>
+    </div>
+
+    <div class="error-actions">
+      <a href="index.html" class="btn btn-primary">Return Home</a>
+      <a href="login.html" class="btn btn-secondary">Admin Login</a>
+    </div>
+
+    <div class="security-badge">
+      <strong>🛡️ Security Notice:</strong> This access attempt has been logged for security purposes.
+    </div>
+  </div>
+</body>
+</html>

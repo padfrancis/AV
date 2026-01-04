@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura Veyn | Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    // Immediate auth check - block page rendering until verified
+    (async function() {
+      let attempts = 0;
+      while (!window.supabaseClient && attempts < 20) {
+        await new Promise(r => setTimeout(r, 50));
+        attempts++;
+      }
+      
+      if (!window.supabaseClient) {
+        window.location.replace('unauthorized.html');
+        return;
+      }
+      
+      try {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (!user) {
+          window.location.replace('unauthorized.html');
+        } else {
+          document.body.classList.add('auth-verified');
+        }
+      } catch (error) {
+        console.error('Auth error:', error);
+        window.location.replace('unauthorized.html');
+      }
+    })();
+  </script>
+  <style>
+    /* Hide entire page by default until auth verified */
+    body {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    body.auth-verified {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.3s ease;
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .applications-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .applications-table th,
+    .applications-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .applications-table th {
+      background: rgba(255,255,255,0.03);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .applications-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .thumb-img {
+      width: 90px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .thumb-img:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    }
+
+    .thumb-expired,
+    .thumb-empty {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px dashed var(--border);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .apps-actions-inline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .apps-status-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+    }
+
+    .apps-expiry-text {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.2;
+    }
+
+    .apps-status {
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: capitalize;
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .apps-status.pending { background: rgba(255,193,7,0.08); color: #fbbf24; border-color: rgba(251,191,36,0.4); }
+    .apps-status.approved { background: rgba(16,185,129,0.08); color: #10b981; border-color: rgba(16,185,129,0.4); }
+    .apps-status.rejected { background: rgba(239,68,68,0.08); color: #ef4444; border-color: rgba(239,68,68,0.4); }
+
+    .apps-notes {
+      max-width: 260px;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .admin-container {
+      max-width: 1400px;
+      margin: 80px auto;
+      padding: 40px 20px;
+      flex: 1;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .admin-header h1 {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      color: var(--accent);
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 12px;
+      background: var(--surface-elevated);
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .filter-tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .filter-tab:hover {
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    .filter-tab.active {
+      color: var(--accent);
+      background: var(--surface);
+    }
+
+    .filter-tab .count {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 8px;
+      background: var(--accent);
+      color: white;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .admin-container { padding: 32px 16px; }
+      .applications-table th,
+      .applications-table td { padding: 10px 10px; font-size: 0.95rem; }
+      .filter-tabs { flex-wrap: wrap; }
+      .filter-tab { flex: 1 1 46%; text-align: center; }
+    }
+
+    @media (max-width: 720px) {
+      .admin-header h1 { font-size: 2rem; }
+      .admin-header > div { width: 100%; }
+      .filter-tabs { flex-wrap: wrap; }
+      .applications-table th,
+      .applications-table td { padding: 10px 8px; font-size: 0.9rem; }
+      .apps-notes { max-width: 180px; }
+      .table-responsive { overflow-x: auto; }
+      .filter-tab { flex: 1 1 100%; }
+    }
+
+    @media (max-width: 540px) {
+      .admin-container { padding: 24px 12px; }
+      .applications-table th,
+      .applications-table td { padding: 8px 6px; font-size: 0.85rem; }
+      .apps-actions-inline { flex-direction: column; align-items: flex-start; }
+      .thumb-img { width: 72px; height: 48px; }
+    }
+
+    .applications-grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    .application-card {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: var(--transition);
+    }
+
+    .application-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .application-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      gap: 16px;
+    }
+
+    .application-info {
+      flex: 1;
+    }
+
+    .application-ign {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .application-uid {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-family: monospace;
+    }
+
+    .status-badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.1);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .status-approved {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .application-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .detail-label {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .detail-value a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .detail-value a:hover {
+      text-decoration: underline;
+    }
+
+    .screenshots-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .screenshots-title {
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+    }
+
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+    }
+
+    .screenshot-item {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+
+    .screenshot-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+
+    .screenshot-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .screenshot-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 6px 8px;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+
+    .application-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 12px 24px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-approve {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-approve:hover {
+      background: rgba(34, 197, 94, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .btn-reject {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-reject:hover {
+      background: rgba(239, 68, 68, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .btn-view {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-view:hover {
+      background: rgba(59, 130, 246, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state-text {
+      font-size: 1.1rem;
+    }
+
+    .loading-container {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .loading-spinner-large {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--surface);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--surface-elevated);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      border: 1px solid var(--border);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .modal-body {
+      margin-bottom: 24px;
+    }
+
+    .modal-textarea {
+      width: 100%;
+      padding: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .modal-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 12px 24px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .modal-btn-cancel {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .modal-btn-cancel:hover {
+      background: var(--surface-elevated);
+    }
+
+    .modal-btn-confirm {
+      background: var(--accent);
+      color: white;
+    }
+
+    .modal-btn-confirm:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Image Modal */
+    .image-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .image-modal.show {
+      display: flex;
+    }
+
+    .image-modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: var(--radius);
+    }
+
+    @media (max-width: 768px) {
+      .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .filter-tabs {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .application-details {
+        grid-template-columns: 1fr;
+      }
+
+      .application-actions {
+        flex-direction: column;
+      }
+    }
+
+    /* Real-time notification animations */
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar__container">
+      <a href="index.html" class="navbar__brand">
+        <img src="./logo.png" alt="Aura Veyn" class="brand__logo" />
+        <span class="brand__text" id="brandGreeting">Hi, Visitor</span>
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="navbar__menu-wrapper" id="menuWrapper">
+        <ul class="navbar__menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="index.html#roster" class="nav-link">Official Members</a></li>
+          <li><a href="admin.html" class="nav-link active">Admin Dashboard</a></li>
+        </ul>
+        <div class="navbar__actions-mobile">
+          <span class="user-greeting" id="userGreeting" style="display: none; color: var(--accent); margin-right: 12px;"></span>
+          <button class="btn btn--nav" id="logoutBtn">Sign Out</button>
+        </div>
+      </div>
+      <div class="navbar__actions">
+        <span class="user-greeting" id="userGreeting" style="display: none; color: var(--accent); margin-right: 12px;"></span>
+        <button class="btn btn--nav" id="logoutBtn">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="admin-container">
+    <div class="admin-header">
+      <h1>Application Dashboard</h1>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-status="all">All <span class="count" id="countAll">0</span></button>
+          <button class="filter-tab" data-status="pending">Pending <span class="count" id="countPending">0</span></button>
+          <button class="filter-tab" data-status="approved">Approved <span class="count" id="countApproved">0</span></button>
+          <button class="filter-tab" data-status="rejected">Rejected <span class="count" id="countRejected">0</span></button>
+        </div>
+        <button class="btn btn--secondary" id="refreshBtn" style="padding: 10px 18px; display: inline-flex; align-items: center; gap: 6px;">
+          <span style="font-size: 18px;">↻</span> Refresh
+        </button>
+      </div>
+    </div>
+
+    <div id="loadingContainer" class="loading-container">
+      <div class="loading-spinner-large"></div>
+      <div style="color: var(--text-secondary);">Loading applications...</div>
+    </div>
+
+    <div id="applicationsContainer" class="applications-grid" style="display: none;"></div>
+
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-state-icon">📋</div>
+      <div class="empty-state-text">No applications found</div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <p class="footer-text">
+        Made by <a href="https://github.com/padfrancis" target="_blank" rel="noopener noreferrer" class="footer-link">padfrancis</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Action Modal -->
+  <div id="actionModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Confirm Action</h2>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label for="adminNotes" style="display: block; margin-bottom: 8px; color: var(--text);">Admin Notes (Optional)</label>
+        <textarea id="adminNotes" class="modal-textarea" placeholder="Add any notes about this decision..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-btn modal-btn-confirm" id="confirmActionBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Modal -->
+  <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+    <img id="modalImage" class="image-modal-content" />
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

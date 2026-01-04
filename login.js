@@ -1,8 +1,5 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const SUPABASE_URL = "https://rlgelnedymfzpyiddkna.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_jWtcDBPbRUWuhqTWKk7-AA_-E7CZp7Q";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Use shared Supabase client from supabase-config.js
+const supabase = window.supabaseClient;
 
 // DOM refs
 const loginForm = document.getElementById("loginForm");
@@ -11,7 +8,7 @@ const adminPasswordInput = document.getElementById("adminPassword");
 const loginStatus = document.getElementById("loginStatus");
 const loginBtn = document.getElementById("loginBtn");
 
-// Check if already logged in; redirect to roster
+// Redirect if already logged in
 async function checkSession() {
   const { data, error } = await supabase.auth.getSession();
   if (error) {
@@ -19,7 +16,6 @@ async function checkSession() {
     return;
   }
   if (data.session) {
-    // Already logged in, redirect to roster
     window.location.href = "index.html";
   }
 }
@@ -50,5 +46,12 @@ loginForm.addEventListener("submit", async (event) => {
   }, 800);
 });
 
-// On page load, check if already authenticated
+// Listen for auth state changes to redirect if already logged in elsewhere
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session) {
+    window.location.href = "index.html";
+  }
+});
+
+// Initial check
 checkSession();
