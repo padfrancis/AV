@@ -38,6 +38,7 @@ if (hamburger && menuWrapper) {
     const isOpen = hamburger.getAttribute("aria-expanded") === "true";
     hamburger.setAttribute("aria-expanded", !isOpen);
     menuWrapper.classList.toggle("active");
+    document.body.classList.toggle("nav-open", !isOpen);
   });
 
   // Close menu when a link is clicked
@@ -46,6 +47,7 @@ if (hamburger && menuWrapper) {
     link.addEventListener("click", () => {
       hamburger.setAttribute("aria-expanded", "false");
       menuWrapper.classList.remove("active");
+      document.body.classList.remove("nav-open");
     });
   });
 
@@ -58,6 +60,7 @@ if (hamburger && menuWrapper) {
     ) {
       hamburger.setAttribute("aria-expanded", "false");
       menuWrapper.classList.remove("active");
+      document.body.classList.remove("nav-open");
     }
   });
 }

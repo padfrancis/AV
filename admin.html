@@ -775,5 +775,30 @@
   </div>
 
   <script src="admin.js"></script>
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const menuWrapper = document.getElementById('menuWrapper');
+    if (hamburger && menuWrapper) {
+      hamburger.addEventListener('click', () => {
+        const isOpen = menuWrapper.classList.toggle('active');
+        hamburger.setAttribute('aria-expanded', String(isOpen));
+        document.body.classList.toggle('nav-open', isOpen);
+      });
+      menuWrapper.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => {
+          menuWrapper.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('nav-open');
+        });
+      });
+      document.addEventListener('click', (e) => {
+        if (!hamburger.contains(e.target) && !menuWrapper.contains(e.target) && menuWrapper.classList.contains('active')) {
+          menuWrapper.classList.remove('active');
+          hamburger.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('nav-open');
+        }
+      });
+    }
+  </script>
 </body>
 </html>

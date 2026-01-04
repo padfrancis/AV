@@ -180,6 +180,14 @@ body {
 }
 
 @media (max-width: 992px) {
+  body.nav-open {
+    overflow: auto;
+  }
+
+  body.nav-open::after {
+    display: none;
+  }
+
   .navbar__menu-wrapper {
     display: none;
     position: absolute;
@@ -188,9 +196,14 @@ body {
     right: 0;
     background: var(--surface-elevated);
     border-bottom: 1px solid var(--border);
-    padding: 20px 32px;
-    z-index: 101;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    padding: 12px 18px 16px;
+    z-index: 200;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    overflow: visible;
+    transform: none;
+    transition: opacity 0.2s ease;
+    pointer-events: auto;
+    opacity: 1;
   }
   
   .navbar__menu-wrapper.active {
@@ -198,13 +211,39 @@ body {
   }
   
   .navbar__menu-wrapper .navbar__menu {
+    display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 16px;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    list-style: none;
   }
   
   .navbar__menu-wrapper .nav-link {
-    padding: 12px 0;
+    display: block;
+    padding: 16px 0;
+    width: 100%;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .navbar__actions-mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 0;
+    padding-top: 4px;
+  }
+
+  .navbar__actions-mobile .btn--nav {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 16px 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
   }
 }
 
@@ -901,7 +940,13 @@ textarea {
 
 @media (max-width: 992px) {
   .navbar__menu {
-    display: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    width: 100%;
   }
   
   .hamburger {
@@ -911,6 +956,7 @@ textarea {
   .navbar__actions {
     display: none;
   }
+
   
   .page-shell {
     padding: 0 20px 50px;
@@ -959,7 +1005,7 @@ textarea {
   
   .navbar__menu-wrapper {
     top: 68px;
-    padding: 16px 18px;
+    padding: 12px 18px 16px;
   }
   
   .navbar__actions-mobile {
